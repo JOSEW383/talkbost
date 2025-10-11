@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: talkbost_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-talkbost}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-talkbost2025}
+      POSTGRES_DB: ${DB_NAME:-talkbost_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - talkbost_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-talkbost}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-development}
+    container_name: talkbost_backend
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-talkbost}:${DB_PASSWORD:-talkbost2025}@db:5432/${DB_NAME:-talkbost_db}
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      ALLOWED_HOSTS_FRONTEND: ${ALLOWED_HOSTS_FRONTEND:-http://localhost:4321}
+      ALLOWED_HOSTS_ADMIN: ${ALLOWED_HOSTS_ADMIN:-http://localhost:4322}
+    volumes:
+      - ./backend:/app
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - talkbost_network
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  # Frontend (Students)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-development}
+    container_name: talkbost_frontend
+    environment:
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+      FRONTEND_PORT: ${FRONTEND_PORT:-4321}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT:-4321}:4321"
+    depends_on:
+      - backend
+    networks:
+      - talkbost_network
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+  # Admin Panel
+  admin:
+    build:
+      context: ./admin-panel
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-development}
+    container_name: talkbost_admin
+    environment:
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+      ADMIN_PORT: ${ADMIN_PORT:-4322}
+    volumes:
+      - ./admin-panel:/app
+      - /app/node_modules
+    ports:
+      - "${ADMIN_PORT:-4322}:4322"
+    depends_on:
+      - backend
+    networks:
+      - talkbost_network
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "4322"]
+
+networks:
+  talkbost_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
