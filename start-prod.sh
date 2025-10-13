@@ -36,20 +36,6 @@ echo "   BUILD_TARGET=${BUILD_TARGET}"
 echo "   ENVIRONMENT=${ENVIRONMENT}"
 echo ""
 
-# Warning about production mode
-echo "⚠️  WARNING: Running in PRODUCTION mode"
-echo "Make sure you have:"
-echo "  - Changed the SECRET_KEY in .env"
-echo "  - Changed the DB_PASSWORD in .env"
-echo "  - Configured proper SSL/TLS certificates (if needed)"
-echo ""
-read -p "Continue? (y/n) " -n 1 -r
-echo ""
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Cancelled."
-    exit 1
-fi
-
 # Stop any running containers
 echo "🛑 Stopping existing containers..."
 docker-compose down
