@@ -1,12 +1,16 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/JOSEW383/talkbost-frontend.git
+	branch = main
 [submodule "admin-panel"]
 	path = admin-panel
 	url = https://github.com/JOSEW383/talkbost-admin.git
+	branch = main
 [submodule "backend"]
 	path = backend
 	url = https://github.com/JOSEW383/talkbost-backend.git
+	branch = main
 [submodule "db"]
 	path = db
 	url = https://github.com/JOSEW383/talkbost-db.git
+	branch = main
