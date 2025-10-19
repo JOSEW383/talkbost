@@ -58,6 +58,8 @@ services:
     container_name: talkbost_frontend
     environment:
       PORT: 80
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8001}
+      ALLOWED_HOSTS_FRONTEND: ${ALLOWED_HOSTS_FRONTEND}
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -80,6 +82,8 @@ services:
     container_name: talkbost_admin
     environment:
       PORT: 80
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8001}
+      ALLOWED_HOSTS_ADMIN: ${ALLOWED_HOSTS_ADMIN}
     volumes:
       - ./admin-panel:/app
       - /app/node_modules
