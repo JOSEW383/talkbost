@@ -26,8 +26,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: ${ENVIRONMENT:-development}
-      args:
-        PORT: ${BACKEND_PORT:-8000}
     container_name: talkbost_backend
     environment:
       DATABASE_URL: postgresql://${DB_USER:-talkbost}:${DB_PASSWORD:-talkbost2025}@db:5432/${DB_NAME:-talkbost_db}
@@ -55,7 +53,7 @@ services:
     container_name: talkbost_frontend
     environment:
       PORT: 80
-      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8001}
+      PUBLIC_API_URL: ${PUBLIC_API_URL}
       ALLOWED_HOSTS_FRONTEND: ${ALLOWED_HOSTS_FRONTEND}
     volumes:
       - ./frontend:/app
@@ -76,7 +74,7 @@ services:
     container_name: talkbost_admin
     environment:
       PORT: 80
-      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8001}
+      PUBLIC_API_URL: ${PUBLIC_API_URL}
       ALLOWED_HOSTS_ADMIN: ${ALLOWED_HOSTS_ADMIN}
     volumes:
       - ./admin-panel:/app
