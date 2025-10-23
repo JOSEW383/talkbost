@@ -11,6 +11,10 @@ A complete web application for managing English courses with a student frontend,
 - ✅ Activities with completion checks
 - ✅ Personal and public annotations
 - ✅ Progress system with statistics
+- ✅ Gamification system (coins, levels, shop, leaderboard)
+- ✅ Real-time reactions and interactions
+- ✅ Vocabulary management
+- ✅ Audio sound effects
 - ✅ Responsive and minimalist design
 
 ### Admin Panel
@@ -20,12 +24,18 @@ A complete web application for managing English courses with a student frontend,
 - ✅ View progress of all students
 - ✅ View annotations (public and private)
 - ✅ Dashboard with statistics
+- ✅ Gamification management
+- ✅ Vocabulary oversight
 
 ### Backend API
 - ✅ JWT Authentication
 - ✅ Complete RESTful endpoints
 - ✅ PostgreSQL as database
 - ✅ User, course, lesson, progress, and annotation management
+- ✅ Gamification API (coins, shop, inventory)
+- ✅ Vocabulary management
+- ✅ Engagement tracking and analytics
+- ✅ WebSocket support for real-time features
 - ✅ Automatic documentation (Swagger/OpenAPI)
 
 ## 📚 Class Structure
@@ -49,6 +59,8 @@ Each class includes:
 - TypeScript
 - Zustand (state management)
 - Axios (HTTP client)
+- date-fns (date utilities)
+- react-markdown & remark-gfm (markdown rendering)
 
 ### Backend
 - FastAPI
@@ -56,6 +68,9 @@ Each class includes:
 - PostgreSQL
 - JWT Authentication
 - Pydantic (validation)
+- Alembic (database migrations)
+- asyncpg (async PostgreSQL driver)
+- email-validator
 
 ### Infrastructure
 - Docker & Docker Compose
@@ -72,18 +87,15 @@ Each class includes:
 ├── backend/           # Backend API (FastAPI)
 ├── db/                # Database scripts (PostgreSQL)
 ├── .env               # Environment variables (main)
-├── .env.development   # Development template
-├── .env.production    # Production template
+├── .env.example       # Environment variables template
 ├── docker-compose.yml # Container orchestration
-├── start-dev.sh       # Script to start in development
-├── start-prod.sh      # Script to start in production
 ```
 
 ## ⚙️ Environment Configuration
 
-**Important:** This project uses a single `.env` file in the root directory shared by all services.
+**Important:** This project uses a single `.env` file in the root directory shared by all services. Use `.env.example` as a template.
 
-The `.env` file is automatically created when running `start-dev.sh` or `start-prod.sh` if it doesn't exist.
+The `ENVIRONMENT` variable defines the deployment mode (`development` or `production`), which controls the Docker build target and runtime behavior.
 
 ## 🚀 Quick Start
 
@@ -112,26 +124,28 @@ git pull --recurse-submodules
 ### Development
 
 ```bash
-# Give execution permissions to scripts (first time only)
-chmod +x start-dev.sh start-prod.sh
+# Copy environment template if .env doesn't exist
+cp .env.example .env
 
-# Start in development mode (creates .env automatically if it doesn't exist)
-./start-dev.sh
+# Start in development mode
+docker-compose up --build
 ```
-
-Services will be available at:
-- **Frontend (Students)**: http://localhost:4321
-- **Admin Panel**: http://localhost:4322
-- **Backend API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
 
 ### Production
 
 ```bash
-# Start in production mode
-# The script will ask you to edit sensitive values if .env doesn't exist
-./start-prod.sh
+# Edit .env file with production values (change ENVIRONMENT=production and secure passwords)
+nano .env  # or your preferred editor
+
+# Start in production mode (detached)
+docker-compose up --build -d
 ```
+
+Services will be available at the ports configured in `.env`:
+- **Frontend (Students)**: http://localhost:${FRONTEND_PORT}
+- **Admin Panel**: http://localhost:${ADMIN_PORT}
+- **Backend API**: http://localhost:${BACKEND_PORT}
+- **API Docs**: http://localhost:${BACKEND_PORT}/docs
 
 ## 🐳 Useful Docker Commands
 
