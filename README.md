@@ -174,3 +174,67 @@ docker exec -it talkbost_db psql -U talkbost -d talkbost_db
 Interactive API documentation is available at:
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
+
+## 🐳 Docker Compose Setup
+
+Para ejecutar la aplicación completa en desarrollo o producción usando Docker Compose, crea un archivo `docker-compose.yml` en la raíz del proyecto con el siguiente contenido:
+
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    image: ghcr.io/josew383/talkbost:latest-backend
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      SECRET_KEY: ${SECRET_KEY}
+      ALLOWED_HOSTS_FRONTEND: ${ALLOWED_HOSTS_FRONTEND}
+      ALLOWED_HOSTS_ADMIN: ${ALLOWED_HOSTS_ADMIN}
+    ports:
+      - "${BACKEND_PORT}:8000"
+    depends_on:
+      - db
+
+  frontend:
+    image: ghcr.io/josew383/talkbost:latest-frontend
+    environment:
+      PUBLIC_API_URL: http://backend:${BACKEND_PORT}
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - backend
+
+  admin-panel:
+    image: ghcr.io/josew383/talkbost:latest-admin-panel
+    ports:
+      - "${ADMIN_PORT}:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+```
+
+### Instrucciones para usar Docker Compose:
+1. Copia el contenido anterior a `docker-compose.yml`.
+2. Crea un archivo `.env` en la raíz (o usa el existente) con las variables definidas.
+3. Ejecuta `docker-compose up -d` para iniciar los servicios.
+4. Accede a:
+   - Frontend: `http://localhost:${FRONTEND_PORT}`
+   - Admin Panel: `http://localhost:${ADMIN_PORT}`
+   - Backend API: `http://localhost:${BACKEND_PORT}`
