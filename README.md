@@ -184,6 +184,7 @@ version: '3.8'
 
 services:
   db:
+    container_name: talkbost_db
     image: postgres:15
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -195,6 +196,7 @@ services:
       - db_data:/var/lib/postgresql/data
 
   backend:
+    container_name: talkbost_backend
     image: ghcr.io/josew383/talkbost:latest-backend
     environment:
       ENVIRONMENT: ${ENVIRONMENT}
@@ -211,6 +213,7 @@ services:
       - db
 
   frontend:
+    container_name: talkbost_frontend
     image: ghcr.io/josew383/talkbost:latest-frontend
     environment:
       PUBLIC_API_URL: http://backend:${BACKEND_PORT}
@@ -220,6 +223,7 @@ services:
       - backend
 
   admin-panel:
+    container_name: talkbost_admin
     image: ghcr.io/josew383/talkbost:latest-admin-panel
     ports:
       - "${ADMIN_PORT}:80"
