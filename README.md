@@ -180,6 +180,12 @@ Interactive API documentation is available at:
 To run the complete application in development or production using Docker Compose, create a `docker-compose.yml` file in the project root with the following content:
 
 ```yaml
+x-credentials: &ghcr-auth
+  image: ""
+  deploy:
+    labels:
+      com.docker.compose.auth: "ghcr"
+
 services:
   # PostgreSQL Database
   db:
