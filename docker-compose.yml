@@ -33,11 +33,10 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       ALLOWED_HOSTS_FRONTEND: ${ALLOWED_HOSTS_FRONTEND:-http://localhost:4321}
       ALLOWED_HOSTS_ADMIN: ${ALLOWED_HOSTS_ADMIN:-http://localhost:4322}
-      PORT: ${BACKEND_PORT:-8000}
     volumes:
       - ./backend:/app
     ports:
-      - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
+      - "${BACKEND_PORT}:8000"
     depends_on:
       db:
         condition: service_healthy
