@@ -177,68 +177,85 @@ Interactive API documentation is available at:
 
 ## 🐳 Docker Compose Setup
 
-Para ejecutar la aplicación completa en desarrollo o producción usando Docker Compose, crea un archivo `docker-compose.yml` en la raíz del proyecto con el siguiente contenido:
+To run the complete application in development or production using Docker Compose, create a `docker-compose.yml` file in the project root with the following content:
 
 ```yaml
-version: '3.8'
-
 services:
+  # PostgreSQL Database
   db:
+    image: postgres:15-alpine
     container_name: talkbost_db
-    image: postgres:15
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "${DB_PORT}:5432"
+      POSTGRES_USER: ${DB_USER:-talkbost}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-talkbost2025}
+      POSTGRES_DB: ${DB_NAME:-talkbost_db}
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-talkbost} -d ${DB_NAME:-talkbost_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # Backend
   backend:
-    container_name: talkbost_backend
     image: ghcr.io/josew383/talkbost:latest-backend
+    container_name: talkbost_backend
     environment:
-      ENVIRONMENT: ${ENVIRONMENT}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_PORT: ${DB_PORT}
-      SECRET_KEY: ${SECRET_KEY}
-      ALLOWED_HOSTS_FRONTEND: ${ALLOWED_HOSTS_FRONTEND}
-      ALLOWED_HOSTS_ADMIN: ${ALLOWED_HOSTS_ADMIN}
+      DATABASE_URL: postgresql://${DB_USER:-talkbost}:${DB_PASSWORD:-talkbost2025}@db:5432/${DB_NAME:-talkbost_db}
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      ALLOWED_HOSTS_FRONTEND: ${ALLOWED_HOSTS_FRONTEND:-http://localhost:4321}
+      ALLOWED_HOSTS_ADMIN: ${ALLOWED_HOSTS_ADMIN:-http://localhost:4322}
     ports:
       - "${BACKEND_PORT}:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    x-credentials: *ghcr-auth
 
+  # Frontend
   frontend:
-    container_name: talkbost_frontend
     image: ghcr.io/josew383/talkbost:latest-frontend
+    container_name: talkbost_frontend
     environment:
-      PUBLIC_API_URL: http://backend:${BACKEND_PORT}
+      PUBLIC_API_URL: ${PUBLIC_API_URL}
+      ALLOWED_HOSTS_FRONTEND: ${ALLOWED_HOSTS_FRONTEND}
     ports:
       - "${FRONTEND_PORT}:80"
     depends_on:
       - backend
+    x-credentials: *ghcr-auth
 
-  admin-panel:
-    container_name: talkbost_admin
+  # Admin Panel
+  admin:
     image: ghcr.io/josew383/talkbost:latest-admin-panel
+    container_name: talkbost_admin
+    environment:
+      PUBLIC_API_URL: ${PUBLIC_API_URL}
+      ALLOWED_HOSTS_ADMIN: ${ALLOWED_HOSTS_ADMIN}
     ports:
       - "${ADMIN_PORT}:80"
     depends_on:
       - backend
+    x-credentials: *ghcr-auth
 
 volumes:
-  db_data:
+  postgres_data:
 ```
 
-### Instrucciones para usar Docker Compose:
-1. Copia el contenido anterior a `docker-compose.yml`.
-2. Crea un archivo `.env` en la raíz (o usa el existente) con las variables definidas.
-3. Ejecuta `docker-compose up -d` para iniciar los servicios.
-4. Accede a:
-   - Frontend: `http://localhost:${FRONTEND_PORT}`
-   - Admin Panel: `http://localhost:${ADMIN_PORT}`
-   - Backend API: `http://localhost:${BACKEND_PORT}`
+### Instructions for using Docker Compose:
+1. Copy the content above into `docker-compose.yml`.
+2. Create a `.env` file in the project root (or use the existing one) with the required environment variables.
+3. Log in to GitHub Container Registry (if pulling images from ghcr.io):
+
+  docker login ghcr.io -u <USERNAME>
+
+  You will be prompted for your GitHub personal access token as the password. Make sure the token has the appropriate permissions to read packages.
+1. Run `docker-compose up -d` to start the services.
+2. Access the services at:
+  - Frontend: `http://localhost:${FRONTEND_PORT}`
+  - Admin Panel: `http://localhost:${ADMIN_PORT}`
+  - Backend API: `http://localhost:${BACKEND_PORT}`
