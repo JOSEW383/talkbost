@@ -57,6 +57,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           submodules: true
 
       - name: Set lowercase repo owner
