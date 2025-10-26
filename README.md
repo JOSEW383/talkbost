@@ -16,6 +16,8 @@ A complete web application for managing English courses with a student frontend,
 - ✅ Vocabulary management
 - ✅ Audio sound effects
 - ✅ Responsive and minimalist design
+- ✅ PWA support (vite-plugin-pwa)
+- ✅ Social share previews (Open Graph)
 
 ### Admin Panel
 - ✅ Administrator authentication
@@ -61,6 +63,7 @@ Each class includes:
 - Axios (HTTP client)
 - date-fns (date utilities)
 - react-markdown & remark-gfm (markdown rendering)
+- vite-plugin-pwa (PWA support)
 
 ### Backend
 - FastAPI
